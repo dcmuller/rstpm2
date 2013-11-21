@@ -18,6 +18,8 @@
 ##   require(bbmle)
 ## }
 
+## pm2-3.R -- edited by dcmuller
+
 ## extension of ns() to include different boundary derivatives,
 ## centering and cure
 nsx <- 
@@ -553,7 +555,13 @@ stpm2 <- function(formula, data,
   {
     ## set up the data
     ## ensure that data is a data frame
-    data <- get_all_vars(formula, data)
+    ## dcmuller -- commented out the following line
+    #data <- get_all_vars(formula, data, "weights")
+    ## dcmuller -- check direcly that data is a data frame
+    if (is.data.frame(data)) 
+      data <- data
+    else
+      stop("data argument must be a data frame")
     ## restrict to non-missing data (assumes na.action=na.omit)
     .include <- Reduce(`&`,
                        lapply(model.frame(formula, data, na.action=na.pass),
@@ -646,7 +654,11 @@ stpm2 <- function(formula, data,
     X <- lpmatrix.lm(lm.obj,data)
     mt <- terms(lm.obj)
     mf <- model.frame(lm.obj)
-    wt <- model.weights(lm.obj$model)
+    ## dcmuller - this next line is a bug, I think
+    ##  (the lm only used the cases). Get weights from
+    ##  the cox fit instead
+    #wt <- model.weights(lm.obj$model)
+    wt <- model.weights(coxph.obj$model)
     if (is.null(wt)) wt <- rep(1,nrow(X))
     ##
     ## XD matrix
